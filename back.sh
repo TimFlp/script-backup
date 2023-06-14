@@ -3,44 +3,38 @@
 # Paramètres de connexion SSH
 remote_user="backupuser"
 remote_host="adresse_du_serveur"
-remote_dir="/la/ou/on/sauvegarde"
 
 # Répertoires à sauvegarder
-directories=(
-    "/var/www/html"
+files=(
+    "/var/www/html/index.html"
     "/var/lib/save"
 )
 
-# Boucle sur les répertoires à sauvegarder
-for dir in "${directories[@]}"
+# Création répertoire backup sur machine locale
+echo "[*] Création du répertoire de backup daté..."
+name=save-$(date +%Y-%m-%d)
+mkdir /home/test/backup/$name
+chemin_local="/home/test/backup/$name"
+
+# Boucle sur les fichiers à sauvegarder
+for file in "${files[@]}"
 do
-    # Nom du répertoire
-    dir_name=$(basename "$dir")
+    file_name=$(basename "$file")
+    scp "$remote_user@$remote_host:$file_name" "$chemin_local/$file_name"
 
-    # Nom du fichier de sauvegarde
-    backup_file="${dir_name}_$(date +"%Y%m%d_%H%M%S").tar.gz"
-
-    # Créer une archive tar.gz du répertoire sur le serveur distant
-    ssh "$remote_user@$remote_host" "tar -czf '$remote_dir/$backup_file' '$dir'"
-
-    # Vérifier si la création de l'archive a réussi sur le serveur distant
+    # Vérifier si copie réussi
     if [ $? -eq 0 ]; then
-        echo "Sauvegarde de $dir créée avec succès sur le serveur distant"
+        echo "[*] Sauvegarde de $file récupérée avec succès sur votre machine locale..."
     else
-        echo "Échec de la création de la sauvegarde de $dir sur le serveur distant"
-        continue
+        echo "[!] Échec de la récupération de la sauvegarde de $file."
     fi
-
-    # Copier l'archive depuis le serveur distant vers votre machine locale via SCP
-    scp "$remote_user@$remote_host:$remote_dir/$backup_file" .
-
-    # Vérifier si la copie a réussi
-    if [ $? -eq 0 ]; then
-        echo "Sauvegarde de $dir récupérée avec succès sur votre machine locale"
-    else
-        echo "Échec de la récupération de la sauvegarde de $dir sur votre machine locale"
-    fi
-
-    # Supprimer l'archive sur le serveur distant après la copie
-    ssh "$remote_user@$remote_host" "rm '$remote_dir/$backup_file'"
 done
+
+# Zippe le répertoire
+echo "[*] Création archive répertoire..."
+tar -czvf $name.tar.gz $chemin_local
+echo "[*] Suppresion du répertoire..."
+rm $chemin_local
+
+# Fini
+echo "[*] Procédure de sauvegarde terminée !"
