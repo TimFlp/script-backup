@@ -4,7 +4,7 @@
 remote_user="backupuser"
 remote_host="adresse_du_serveur"
 
-# Répertoires à sauvegarder
+# Fichiers à sauvegarder
 files=(
     "/var/www/html/index.html"
     "/var/lib/save/test"
