@@ -7,7 +7,7 @@ remote_host="adresse_du_serveur"
 # Répertoires à sauvegarder
 files=(
     "/var/www/html/index.html"
-    "/var/lib/save"
+    "/var/lib/save/test"
 )
 
 # Création répertoire backup sur machine locale
