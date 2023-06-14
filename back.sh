@@ -14,13 +14,13 @@ files=(
 echo "[*] Création du répertoire de backup daté..."
 name=save-$(date +%Y-%m-%d)
 mkdir /home/test/backup/$name
-chemin_local="/home/test/backup/$name"
+chemin_local="backup/$name"
 
 # Boucle sur les fichiers à sauvegarder
 for file in "${files[@]}"
 do
     file_name=$(basename "$file")
-    scp "$remote_user@$remote_host:$file_name" "$chemin_local/$file_name"
+    scp "$remote_user@$remote_host:$file" "$chemin_local/$file_name"
 
     # Vérifier si copie réussi
     if [ $? -eq 0 ]; then
@@ -32,9 +32,9 @@ done
 
 # Zippe le répertoire
 echo "[*] Création archive répertoire..."
-tar -czvf $name.tar.gz $chemin_local
+tar -czvf /home/test/backup/$name.tar.gz $chemin_local
 echo "[*] Suppresion du répertoire..."
-rm $chemin_local
+rm -r $chemin_local
 
 # Fini
 echo "[*] Procédure de sauvegarde terminée !"
